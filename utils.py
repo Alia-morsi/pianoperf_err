@@ -6,6 +6,21 @@ import os
 import pretty_midi as pm
 from scipy.io.wavfile import write #i recall there being another more common library for just writing the audio file...
 import matplotlib.pyplot as plt
+import librosa
+import pretty_midi
+
+
+def one_time_fix():
+    #make sure to keep everything in a folder hierarchy like the original
+    #renames all the mxls into -score
+    #make a midi version of the mxl-score
+    #renames the midi file with a -rendered suffix (no synthesis needed)
+    return 
+
+def update_mistake_files():
+    #for the file hierarchy created in one_time_fix:
+    #create mistakes and export their time map
+    return
 
 #synthesize_midi('eval-data/**/*.mid', 'eval-data-synth')
 def synthesize_midi(glob_string, output_folder):
@@ -28,6 +43,10 @@ def synthesize_midi(glob_string, output_folder):
             audio_data = midi_data.fluidsynth(fs=44100)
             write(os.path.join(new_basepath, f"{name}.wav"), 44100, audio_data)
     
+
+def convert_midi_scores(input_folder, output_folder):
+    #convert the xml scores into midi and save in output folder
+    return
 
 #This is a utility function to chop my piano roll
 def get_piano_roll(midi_file, start_time, end_time):
@@ -59,10 +78,24 @@ def bulk_run(processing_dict, output_folder, glob_strings=['eval-data/**/*.mid']
                 #relpath without filename
                 relpath = os.path.dirname(os.path.relpath(recording, os.getcwd()))
                 new_basepath = os.path.join(output_folder, label, relpath)
+                print(new_basepath)
                 os.makedirs(new_basepath, exist_ok=True)
                 beat_pred.tofile(os.path.join(new_basepath, f"{name}.csv"), sep='\n')
     return recording_fullpaths, beat_preds
 
+def align_chroma(score_midi, perf_midi, fs=44100, stride=512, n_fft=4096):
+    score_synth = pretty_midi.PrettyMIDI(score_midi).fluidsynth(fs=fs)
+    perf = pretty_midi.PrettyMIDI(perf_midi).fluidsynth(fs=fs)
+    score_chroma = librosa.feature.chroma_stft(y=score_synth, sr=fs, tuning=0, norm=2,
+                                               hop_length=stride, n_fft=n_fft)
+    score_logch = librosa.power_to_db(score_chroma, ref=score_chroma.max())
+    perf_chroma = librosa.feature.chroma_stft(y=perf, sr=fs, tuning=0, norm=2,
+                                              hop_length=stride, n_fft=n_fft)
+    perf_logch = librosa.power_to_db(perf_chroma, ref=perf_chroma.max())
+    D, wp = librosa.sequence.dtw(X=score_logch, Y=perf_logch)
+    path = np.array(list(reversed(np.asarray(wp))))
+
+    return np.array([(s,t) for s,t in dict(reversed(wp)).items()])*(stride/fs), D, path
 
 #displays a segment of beat trackings results from a given file. If target is not known pass an empty array
 def display(midi_recording, beats_pred, beats_targ, start_time, end_time):
