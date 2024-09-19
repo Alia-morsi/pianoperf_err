@@ -1,0 +1,4 @@
+to run process_midi on example scores and performances:
+1. Download and compile the alignment tool by Eita Nakamura
+2. run process_midi from inside that folder. 
+3. do not add the suffixes to either the score names or the performance names, otherwise the script gets lost

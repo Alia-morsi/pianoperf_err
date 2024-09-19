@@ -10,6 +10,7 @@ def main(input_folder, output_folder, running_folder):
         print("No MIDI file found in the input folder")
         return
 
+    score_midifile = 'Chopin_-_Ballade_no._1_in_G_minor_Op._23'
 
     for midi_file in midi_files:
         # Copy the MIDI file to the running folder
@@ -19,7 +20,7 @@ def main(input_folder, output_folder, running_folder):
 
         # Run the MIDItoMIDIalign.sh script
         script_path = os.path.join(running_folder, 'MIDItoMIDIalign.sh')
-        subprocess.run([script_path, '3-200b', os.path.splitext(midi_filename)[0]], check=True)
+        subprocess.run([script_path, score_midifile, os.path.splitext(midi_filename)[0]], check=True)
 
         # Define the suffixes of the files to be copied
         suffixes = ['match.txt', 'spr.txt', 'corresp.txt']
