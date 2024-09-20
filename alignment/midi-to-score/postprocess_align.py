@@ -5,9 +5,7 @@ from mido import MidiFile, MidiTrack, Message #ditching midi for this absolute t
 import pretty_midi
 from pretty_midi import Note
 
-# Define a function to convert the input text file to a list of dictionaries
-#it's easier to get the wrong pitch and the extra note info from the match file
-
+#not sure if this approach is better than the similar partitura one
 def process_match_file(filename):
     keys = [ 'id', 'onset time', 'offset time', 'spelled pitch', 'onset velocity',
     'offset velocity', 'channel', 'match status', 'score time', 'note ID', 'error index', 'skip index']
@@ -63,6 +61,7 @@ def process_corresp_file(filename):
 
     return data
 
+#this function is incomplete.
 def adapting_corresp_and_match(corresp_filename, match_filename):
     #check if the file exists
     if not os.path.exists(corresp_filename):
