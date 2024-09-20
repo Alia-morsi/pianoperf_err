@@ -11,6 +11,7 @@ def main(input_folder, output_folder, running_folder):
         return
 
     score_midifile = 'Chopin_-_Ballade_no._1_in_G_minor_Op._23'
+    os.mkdir(output_folder)
 
     for midi_file in midi_files:
         # Copy the MIDI file to the running folder
@@ -29,9 +30,14 @@ def main(input_folder, output_folder, running_folder):
         for suffix in suffixes:
             matching_files = glob.glob(os.path.join(running_folder, f'*{suffix}'))
             for file in matching_files:
-                shutil.copy(file, output_folder)
+                shutil.copy(file, os.path.join(output_folder, os.path.split(file)[1]))
                 os.remove(file)
 
+    #remove the intermediary files that are in the running folder.
+    suffixes = ['_fmt3x.txt', '_hmm.txt']
+    for suffix in suffixes:
+        os.remove('{}{}'.format(score_midifile, suffix))
+ 
 if __name__ == "__main__":
     import sys
     if len(sys.argv) != 4:
