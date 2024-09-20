@@ -4,3 +4,14 @@ to run process_midi on example scores and performances:
 3. currently process_midi would only run a predetermined score file (hard coded in the script), that needs to be present in the AlignmentTool directory. It would align all performances of that score present in input_dir to it. 
 4. do not add the suffixes to either the score names or the performance names, otherwise the script gets lost. 
 
+example: 
+
+To load the alignment results, we should place the alignment output files (the match, spr, and corresp) in a Results folder and use that as the basepath. we can use the loading_alignments.py file which itself is built on partitura.io.nakamuraalign. 
+
+example:
+
+from loading_alignments import get_and_write_alignment_info
+
+get_and_write_alignment_info('/Users/aliamorsi/Documents/pianoperf_err/alignment/midi-to-score/Chopin_Ballade/Results', 'warmup_2021-11-15_a02') 
+
+

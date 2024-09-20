@@ -3,9 +3,6 @@ import os
 import partitura.io.importnakamura as nk
 import numpy as np
 
-#would be nice to link these alignments to partitura objects themselves, tho in theory
-# they do extract all the necessary info from the match file.
-
 ALIGNED = 0
 MISSING = 1
 EXTRA = 2
@@ -13,31 +10,29 @@ EXTRA = 2
 PERF = 0
 SCORE = 1
 
-#load the alignment results of one file
-#load them with postprocess align and the Nakamura stuff of partitura.
+#expects each alignment result for a piece to be placed in a folder with the piecename, and this folder to include the score, performance, and an additional folder called 'Results'
 
-alignments_basepath = '/Users/aliamorsi/Documents/Yamaha-Colab/pianoperf_err/alignment/midi-to-score/alignment_with_pianodiary'
-
-def get_pieces():
+def get_pieces(alignments_basepath):
     #todo: remove the ds store result
     return [i for i in os.listdir(alignments_basepath) if not os.path.isfile(i)]
 
 def get_aligned_pieces(piecename):
-    #just show what are the folders in the Results dir
-    #todo: remove the ds store result.
     return os.listdir(os.path.join(alignments_basepath, piecename, 'Results'))
 
-def get_alignment_results(piece_name, performance_id):
-    #get the match and corresp files
-    piece_fullpath = os.path.join(alignments_basepath, piece_name, 'Results')
+#returns the expected paths for the pd alignments. both the results folder (which has the scores) the results for all peperformances of that piece
+def create_pd_dir_paths(alignments_basepath, piece_name, performance_id):
+    results_folder = os.path.join(alignments_basepath, piece_name, 'Results')
+    return results_folder, os.path.join(results_folder, performance_id) 
 
-    corresp_file = os.path.join(piece_fullpath, performance_id,
+def get_alignment_results(results_folder, performance_id): #in the pd case, the filestem is the performance id
+
+    corresp_file = os.path.join(results_folder,
                                 '{}_corresp.txt'.format(performance_id))
     
-    match_file = os.path.join(piece_fullpath, performance_id,
+    match_file = os.path.join(results_folder,
                                 '{}_match.txt'.format(performance_id))
     
-    spr_file = os.path.join(piece_fullpath, performance_id,
+    spr_file = os.path.join(results_folder,
                                 '{}_spr.txt'.format(performance_id))
     
     corresp = nk.load_nakamuracorresp(corresp_file)
@@ -114,18 +109,24 @@ def get_missing_notes(all_noteobjs):
 def get_misaligned_portions(all_noteobjs, window_length):
     #if a section has extra notes or deleted notes but then has some aligned notes
         #copy the region between the contiguous 0s
-    
-    #
     return    
 
 def get_mistake_stats(all_noteobjs):
     #how often is it an isolated note and then we resume
     return
 
-def get_and_write_alignment_info(basepath, songname, perf_id):
-    corresp, match, spr = get_alignment_results(os.path.join(basepath, songname), perf_id)
+def create_midi_viz(): #not sure what the input is
+    #this function should:
+    #return a midi track for the duration of alignment before a loss
+    #return short midi tracks in the areas where some misalignments happened (that did not affect recovery)
+    #try to quantify these recoverable mistakes from the non recoverable ones. 
+    return
+
+def get_and_write_alignment_info(results_folder, perf_id):
+    corresp, match, spr = get_alignment_results(results_folder, perf_id)
     all_noteobjs, aligned_note_idxs, extra_note_idxs, missing_note_idxs = construct_allnoteobjs(corresp, match, spr)
-    writepath = '{}.txt'.format(os.path.join(basepath, 'alignment_meta', '{}-{}'.format(songname, perf_id)))
+    os.mkdir(os.path.join(results_folder, 'alignment_meta'))
+    writepath = '{}.txt'.format(os.path.join(results_folder, 'alignment_meta', perf_id))
     with open(writepath, 'w') as file:
         file.write(str(all_noteobjs))
     return all_noteobjs
@@ -133,4 +134,4 @@ def get_and_write_alignment_info(basepath, songname, perf_id):
 #understand what the difference is
 #get a list of windows (in score and performance) where there are deviations
 # show them our viewer (The Interpreting patches code)
-#Then, see if I can incorporate mididiff later (on tuesday).
+#Then, see if I can incorporate mididiff later.
